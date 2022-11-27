@@ -1,0 +1,74 @@
+{
+  "HALProvider": {
+    "Other Devices": {
+      "Talon FX[19]/Integrated Sensor": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/Shuffleboard/Shooter Tuning/Flywheel Motor": "Motor Controller",
+      "/Shuffleboard/Shooter Tuning/Flywheel Motor Control/Flywheel Motor": "Motor Controller",
+      "/Shuffleboard/Shooter Tuning/Flywheel Motor Control/PID Selection": "String Chooser",
+      "/Shuffleboard/Shooter Tuning/Onboard PID/TalonFX Onboard PID": "PIDController",
+      "/Shuffleboard/Shooter Tuning/PID Control/Enable Motor": "Command",
+      "/Shuffleboard/Shooter Tuning/PID Control/PID Selection": "String Chooser",
+      "/Shuffleboard/Shooter Tuning/PID Control/TalonFX Onboard PID": "PIDController",
+      "/Shuffleboard/Shooter Tuning/PID Selection": "String Chooser",
+      "/Shuffleboard/Shooter Tuning/Software Feed Forward/Software PID": "PIDController",
+      "/Shuffleboard/Shooter Tuning/TalonFX": "Motor Controller",
+      "/Shuffleboard/Shooter Tuning/TalonFX Onboard PID": "PIDController",
+      "/Shuffleboard/Shooter Tuning/TalonFX Software PID": "PIDController"
+    }
+  },
+  "NetworkTables": {
+    "Shuffleboard": {
+      ".metadata": {
+        "Shooter Tuning": {
+          "Software PID Settings": {
+            "Motor RPM": {
+              "open": true
+            },
+            "Properties": {
+              "open": true
+            },
+            "Software FF Output(V)": {
+              "open": true
+            },
+            "Software FF kA": {
+              "open": true
+            },
+            "Software FF kS": {
+              "open": true
+            },
+            "Software FF kV": {
+              "open": true
+            },
+            "Software PID Output(V)": {
+              "open": true
+            }
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Shooter Tuning": {
+        "TalonFX": {
+          "open": true
+        },
+        "TalonFX Onboard PID": {
+          "open": true
+        },
+        "TalonFX Software PID": {
+          "open": true
+        }
+      },
+      "open": true
+    }
+  }
+}
