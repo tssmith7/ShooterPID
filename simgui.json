@@ -23,7 +23,11 @@
       "/Shuffleboard/Shooter Tuning/Software Feed Forward/Software PID": "PIDController",
       "/Shuffleboard/Shooter Tuning/TalonFX": "Motor Controller",
       "/Shuffleboard/Shooter Tuning/TalonFX Onboard PID": "PIDController",
-      "/Shuffleboard/Shooter Tuning/TalonFX Software PID": "PIDController"
+      "/Shuffleboard/Shooter Tuning/TalonFX Software PID": "PIDController",
+      "/Shuffleboard/TalonFXWidget/Shooter Motor/Control Mode": "String Chooser",
+      "/Shuffleboard/TalonFXWidget/Shooter Motor/Motor Percent Output": "Motor Controller",
+      "/Shuffleboard/TalonFXWidget/Shooter Motor/Onboard PID Settings": "PIDController",
+      "/Shuffleboard/TalonFXWidget/Shooter Motor/PID Settings": "PIDController"
     }
   },
   "NetworkTables": {

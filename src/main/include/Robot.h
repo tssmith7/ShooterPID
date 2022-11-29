@@ -15,7 +15,6 @@
 #include <frc/smartdashboard/SendableChooser.h>
 
 #include "CtreShuffleboard.h"
-#include "ShuffleboardMetadata.h"
 
 double constexpr kRPMtoTICS_PER_100MS = 2048.0 / 600.0;
 double constexpr kTICS_PER_100MStoRPM = 1.0 / kRPMtoTICS_PER_100MS;
@@ -40,6 +39,7 @@ class Robot : public frc::TimedRobot {
   TalonFX m_rightShooterMotor{15};
   shuffle::TalonFX m_leftShooterMotor{19};
   shuffle::TalonFXPIDController m_onboardPID{m_leftShooterMotor, ctre::phoenix::motorcontrol::ControlMode::Velocity};
+  shuffle::TalonFXWidget talon_ui{m_leftShooterMotor, m_onboardPID, "Shooter Motor"};
 
   frc2::PIDController m_softPID{0,0,0};
   frc::SimpleMotorFeedforward<units::radians> m_ff{0_V, 1_V/532_rpm};
@@ -50,7 +50,4 @@ class Robot : public frc::TimedRobot {
   const std::string kOnboardPID = "Onboard PID";
   const std::string kSoftwarePID = "Software PID";
   std::string m_autoSelected;
-  EnableCommand m_enable;
-
-  ctre::phoenix::motorcontrol::TalonFXSimCollection m_motorsim{m_leftShooterMotor.GetSimCollection()};
 };

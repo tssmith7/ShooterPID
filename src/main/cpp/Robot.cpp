@@ -46,21 +46,13 @@ void Robot::RobotPeriodic() {}
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
-void Robot::AutonomousInit() {
+void Robot::AutonomousInit() {}
 
-}
+void Robot::AutonomousPeriodic() {}
 
-void Robot::AutonomousPeriodic() {
-  if (m_autoSelected == kSoftwarePID) {
-    // Custom Auto goes here
-  } else {
-    // Default Auto goes here
-  }
-}
+void Robot::TeleopInit() {talon_ui.Show("TalonFXWidget");}
 
-void Robot::TeleopInit() {}
-
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() {talon_ui.Update();}
 
 void Robot::DisabledInit() {}
 
@@ -138,7 +130,6 @@ void Robot::TestPeriodic() {
 
     if (m_autoSelected == kSoftwarePID) {
         // Using software PID control so turn off Onboard stuff
-      m_onboardPID.SetEnabled( false );
       m_nt_entries["OnboardPID Error"].SetDouble(0.0);
     } else {
       m_nt_entries["SoftFF Output"].SetDouble( 0.0 );
@@ -157,7 +148,11 @@ void Robot::TestPeriodic() {
       // Calculate() function output is [-1,1] so we need to convert to voltage
     units::volt_t pid_volts = m_softPID.Calculate( curr_rpm, m_softPID.GetSetpoint() ) * 12_V;
     m_nt_entries["SoftPID Output"].SetDouble( pid_volts.value() );
-    m_nt_entries["SoftPID_error"].SetDouble( m_softPID.GetVelocityError() );
+
+      // NOTE: GetPositionError() returns the difference between the Setpoint and 
+      // the current measurement.  In Velocity PID control this is a velocity error
+      // so the function is unfortunately named for this case.
+    m_nt_entries["SoftPID_error"].SetDouble( m_softPID.GetPositionError() );
 
       // Get the feed forward constants.
     m_ff.kS = m_nt_entries["FF kS"].GetDouble( 0.0 ) * 1_V;
@@ -186,19 +181,9 @@ void Robot::TestPeriodic() {
   }
 }
 
-void Robot::SimulationInit() { }
+void Robot::SimulationInit() {}
 
-void Robot::SimulationPeriodic() {
-  double sim_velocity;
-  if (m_autoSelected == kSoftwarePID) {
-    sim_velocity = m_softPID.GetSetpoint() * kRPMtoTICS_PER_100MS;
-  } else {
-    sim_velocity = m_onboardPID.GetSetpoint() * kRPMtoTICS_PER_100MS;
-  }
-  double curr_pos = m_leftShooterMotor.GetSelectedSensorPosition();
-  m_motorsim.SetIntegratedSensorRawPosition ( int( curr_pos + (0.2 * sim_velocity)) );
-  m_motorsim.SetIntegratedSensorVelocity( int(sim_velocity) );
-}
+void Robot::SimulationPeriodic() {}
 
 #ifndef RUNNING_FRC_TESTS
 int main() {
