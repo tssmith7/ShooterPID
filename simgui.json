@@ -1,7 +1,27 @@
 {
   "HALProvider": {
     "Other Devices": {
-      "Talon FX[19]/Integrated Sensor": {
+      "Talon FX[15]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[15]/Integrated Sensor": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[19]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[1]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[1]/Integrated Sensor": {
         "header": {
           "open": true
         }
@@ -26,6 +46,7 @@
       "/Shuffleboard/Shooter Tuning/TalonFX Software PID": "PIDController",
       "/Shuffleboard/TalonFXWidget/Shooter Motor/Control Mode": "String Chooser",
       "/Shuffleboard/TalonFXWidget/Shooter Motor/Motor Percent Output": "Motor Controller",
+      "/Shuffleboard/TalonFXWidget/Shooter Motor/Motor Status/Control Mode": "String Chooser",
       "/Shuffleboard/TalonFXWidget/Shooter Motor/Onboard PID Settings": "PIDController",
       "/Shuffleboard/TalonFXWidget/Shooter Motor/PID Settings": "PIDController"
     }
@@ -57,6 +78,9 @@
               "open": true
             }
           },
+          "open": true
+        },
+        "TalonFXWidget": {
           "open": true
         },
         "open": true

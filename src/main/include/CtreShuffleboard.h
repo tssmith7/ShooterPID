@@ -2,14 +2,15 @@
 //      Helper Classes to display CTRE Phoenix motors on Shuffleboard.
 //
 //  Usage::
-//      The shuffle::CANSparkMax and shuffle::SparkMaxPIDController classes are derived
-//      from the corresponding rev:: classes so they can be used in place of them.
+//      The tuning::TalonFX class is just a typedef for the WPI_TalonFX class.
+//      The tuning::TalonFXPIDController classes are derived
+//      from the corresponding ctre:: classes so they can be used in place of them.
 //
 //      Example Code:
 //                      Declare varables in your class for each motor:
-//          shuffle::TalonFX m_talonMotor{4};
-//          shuffle::TalonFXPIDController m_tpid{m_talonMotor, ctre::phoenix::motorcontrol::ControlMode::Velocity};
-//          shuffle::TalonFXWidget talon_ui{m_talonMotor, m_tpid, "Talon Motor 4"};
+//          tuning::TalonFX m_talonMotor{4};
+//          tuning::TalonFXPIDController m_tpid{m_talonMotor, ctre::phoenix::motorcontrol::ControlMode::Velocity};
+//          tuning::TalonFXWidget talon_ui{m_talonMotor, m_tpid, "Talon Motor 4"};
 //
 //                      In TestInit() Call the Show() function:
 //          void TestInit() {
@@ -24,8 +25,8 @@
 //
 //      Individual Widget Usage:
 //                      Declare varables in your class:
-//          shuffle::TalonFX m_talonMotor{4};
-//          shuffle::TalonFXPIDController m_tpid{m_talonMotor, ctre::phoenix::motorcontrol::ControlMode::Velocity};
+//          tuning::TalonFX m_talonMotor{4};
+//          tuning::TalonFXPIDController m_tpid{m_talonMotor, ctre::phoenix::motorcontrol::ControlMode::Velocity};
 //
 //                  In RobotInit() or TestInit() send the motor to Smartdashboard or Shuffleboard:
 //                      NOTE: Smartdashboard takes a pointer to the object, Shuffleboard does NOT.
@@ -55,7 +56,7 @@
 #undef USE_ENABLE_TOGGLE
 
 // Classes 
-namespace shuffle {
+namespace tuning {
 
     // Phoenix Library Provides a class that is Shuffleboard enabled.
     // Just create a typedef to put it in this namespace.
@@ -84,7 +85,6 @@ public:
     double GetI() const { return config.kI; }
     double GetD() const { return config.kD; }
     double GetFF() const { return config.kF; }
-#ifdef USE_ENABLED_TOGGLE
     bool GetEnabled() { return m_enabled; }
     void SetEnabled( bool e ) { 
         if( e != m_enabled ) {  // Enabled is changing
@@ -92,7 +92,6 @@ public:
         }
         m_enabled = e; 
     }
-#endif
     double GetSetpoint() { return m_setpoint; }
     void SetSetpoint( double value) {
         if( m_enabled ) {
@@ -140,11 +139,16 @@ class TalonFXWidget {
 public:
     TalonFXWidget( TalonFX &m, TalonFXPIDController &c, std::string name ) : m_talon{m}, m_pid{c}, m_name{name} {}
     void Show( std::string tab ) {
+        curr_choice = kVelocityPID;
+        m_chooser.SetDefaultOption(kVelocityPID, kVelocityPID);
+        m_chooser.AddOption(kPositionPID, kPositionPID);
+        m_chooser.AddOption(kPercentOutput, kPercentOutput);
+
         frc::ShuffleboardLayout &layout = frc::Shuffleboard::GetTab(tab)
             .GetLayout(m_name, frc::BuiltInLayouts::kGrid)
             .WithProperties( wpi::StringMap<std::shared_ptr<nt::Value>>{
-                             std::make_pair("Number of rows", nt::Value::MakeDouble(2)),
-                             std::make_pair("Number of columns", nt::Value::MakeDouble(2))})
+                             std::make_pair("Number of columns", nt::Value::MakeDouble(2)),
+                             std::make_pair("Number of rows", nt::Value::MakeDouble(2))})
             .WithSize(8, 7);
         layout.Add("Motor Percent Output", m_talon)
             .WithPosition(0, 0);
@@ -153,25 +157,35 @@ public:
             .WithPosition(0,1);
 //        m_pid.SetEnabled( false );
 
-        curr_choice = kVelocityPID;
-        m_chooser.SetDefaultOption(kVelocityPID, kVelocityPID);
-        m_chooser.AddOption(kPositionPID, kPositionPID);
-        layout.Add("Control Mode", m_chooser )
-            .WithWidget(frc::BuiltInWidgets::kComboBoxChooser)
-            .WithPosition(1,0);
-
         m_enabled = layout.Add("Enable Motor", false)
             .WithWidget( frc::BuiltInWidgets::kToggleSwitch)
-            .WithPosition(1,1).GetEntry();
+            .WithPosition(1,0).GetEntry();
+
+        frc::ShuffleboardLayout &sub_layout = frc::Shuffleboard::GetTab(tab)
+            .GetLayout(m_name).GetLayout("Motor Status", frc::BuiltInLayouts::kGrid)
+            .WithProperties( wpi::StringMap<std::shared_ptr<nt::Value>>{
+                             std::make_pair("Number of columns", nt::Value::MakeDouble(1)),
+                             std::make_pair("Number of rows", nt::Value::MakeDouble(3))})
+            .WithPosition(1,1);
+
+        sub_layout.Add("Control Mode", m_chooser )
+            .WithWidget(frc::BuiltInWidgets::kComboBoxChooser)
+            .WithPosition(0,0);
+
+        m_motor_rpm = sub_layout.Add("Motor RPM", 0.0 )
+            .WithPosition(0,1).GetEntry();
+
+        m_motor_pos = sub_layout.Add("Motor Position", 0.0 )
+            .WithPosition(0,2).GetEntry();
 
         wpi::span<double> g_data{graph_data};
         m_graph = &frc::Shuffleboard::GetTab(tab).Add( "Graph", g_data)
-                    .WithWidget(frc::BuiltInWidgets::kGraph)
-                    .WithPosition(1, 1)
-                    .WithProperties(wpi::StringMap<std::shared_ptr<nt::Value>>{
-                        std::make_pair("Visible time", nt::Value::MakeDouble(20.0)),
-                        std::make_pair("Unit", nt::Value::MakeString(units[0])),
-                        std::make_pair("X-axis auto scrolling", nt::Value::MakeBoolean(false))});
+                    .WithWidget(frc::BuiltInWidgets::kGraph);
+//                    .WithPosition(1, 1)
+//                    .WithProperties(wpi::StringMap<std::shared_ptr<nt::Value>>{
+//                        std::make_pair("Visible time", nt::Value::MakeDouble(20.0)),
+//                        std::make_pair("Unit", nt::Value::MakeString(units[0])),
+//                        std::make_pair("X-axis auto scrolling", nt::Value::MakeBoolean(false))});
 
             // This is from Team Jagwires7443 Swerve Code to get the path to the
             // "X-axis auto scrolling" NT item.
@@ -187,50 +201,71 @@ public:
                 m_pid.SetControl( ctre::phoenix::motorcontrol::ControlMode::Velocity );
                 nt::NetworkTableInstance::GetDefault().GetEntry(m_graph_metadata + "Unit")
                     .SetString( units[0] );
-            } else {
+            } else if( m_chooser.GetSelected() == kPositionPID ) {
                 m_pid.SetControl( ctre::phoenix::motorcontrol::ControlMode::Position );
                 nt::NetworkTableInstance::GetDefault().GetEntry(m_graph_metadata + "Unit")
                     .SetString( units[1] );
+            } else {  /* Percent Output */
+                // Nothing to do
             }
             curr_choice = m_chooser.GetSelected();
 
               // If the Control mode has changed then disable the motor.
+              // and switch to enable toggle to OFF.
+            m_talon.Disable();
             m_enabled.SetBoolean(false);
         }
 
-        if( m_chooser.GetSelected() == kVelocityPID ) {
-            graph_data[1] = m_talon.GetSelectedSensorVelocity();
+        m_motor_pos.SetDouble( m_talon.GetSelectedSensorPosition() / kTICS_PER_TURN );
+        m_motor_rpm.SetDouble( m_talon.GetSelectedSensorVelocity() * kTICS_PER_100MStoRPM );
+        if( curr_choice == kVelocityPID ) {
+            graph_data[1] = m_talon.GetSelectedSensorVelocity() * kTICS_PER_100MStoRPM;
+        } else if( curr_choice == kPositionPID ) {
+            graph_data[1] = m_talon.GetSelectedSensorPosition() / kTICS_PER_TURN;
         } else {
-            graph_data[1] = m_talon.GetSelectedSensorPosition();
+            // Don't graph
         }
+        wpi::span<double> g_data{graph_data};
+        m_graph->GetEntry().SetDoubleArray(g_data);
 
         nt::NetworkTableInstance::GetDefault().GetEntry(m_graph_metadata + "X-axis auto scrolling")
             .SetBoolean( m_enabled.GetBoolean(false) );
 
-
         if( m_enabled.GetBoolean(false) ) {
-            // Sets the target set point on the SparkMAX onboard PID controller.
-            m_talon.Set(m_pid.GetControl(), m_pid.GetSetpoint());
-            wpi::span<double> g_data{graph_data};
-            m_graph->GetEntry().SetDoubleArray(g_data);
+            if( curr_choice == kVelocityPID ) {
+                // Sets the target set point on the SparkMAX onboard PID controller.
+                m_talon.Set(m_pid.GetControl(), m_pid.GetSetpoint() * kRPMtoTICS_PER_100MS);
+            } else if( curr_choice == kPositionPID ) {
+                m_talon.Set(m_pid.GetControl(), m_pid.GetSetpoint() * kTICS_PER_TURN);
+            } else {  /* Percent Output */
+                // Don't Set the percent output.  The motor widget will do so.
+            }
+        } else {
+            m_talon.SetVoltage( 0_V );
         }
-
     }
 
 private:
+    static double constexpr kTICS_PER_TURN = 2048.0;
+    static double constexpr kRPMtoTICS_PER_100MS = kTICS_PER_TURN / 600.0;
+    static double constexpr kTICS_PER_100MStoRPM = 1.0 / kRPMtoTICS_PER_100MS;
+
     TalonFX &m_talon;
     TalonFXPIDController m_pid;
     frc::SendableChooser<std::string> m_chooser;
     frc::SimpleWidget *m_graph{nullptr};
     double graph_data[2] = {0.0, 0.0};
 
-    std::string kVelocityPID = "Velocity"; /*default*/
-    std::string kPositionPID = "Position";
+    const std::string kVelocityPID = "Velocity"; /*default*/
+    const std::string kPositionPID = "Position";
+    const std::string kPercentOutput = "Percent Output";
     std::vector<std::string> units = {"\"units\" per 100ms" /*default*/, "\"units\""};
     std::string m_name;
     std::string curr_choice;
     std::string m_graph_metadata;
     nt::NetworkTableEntry m_enabled;
+    nt::NetworkTableEntry m_motor_rpm;
+    nt::NetworkTableEntry m_motor_pos;
 };
 
 }
